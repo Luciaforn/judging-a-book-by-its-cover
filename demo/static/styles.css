@@ -1,0 +1,429 @@
+/* Global reset-ish*/
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f172a; 
+    color: #e5e7eb;
+}
+
+/*Page layout*/
+.page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1.5rem;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    max-width: 640px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #f9fafb;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #c4b5fd;   
+    font-weight: 500; 
+}
+
+
+/*Main container & card grid*/
+.main {
+    width: 100%;
+    max-width: 900px;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/*Card base*/
+.card {
+    background: #020617;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.85),
+        0 0 0 1px rgba(148, 163, 184, 0.15);
+    padding: 1.5rem 1.5rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition:
+        transform 0.18s ease-out,
+        box-shadow 0.18s ease-out,
+        border-color 0.18s ease-out,
+        background 0.18s ease-out;
+}
+
+/* Hover/focus styles */
+.card:hover,
+.card:focus-within {
+    transform: translateY(-4px);
+    box-shadow:
+        0 24px 55px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(129, 140, 248, 0.25);
+    border-color: rgba(129, 140, 248, 0.7);
+    background: #020617;
+}
+
+/*Card contents*/
+.card-body {
+    cursor: default;
+}
+
+.card-clickable {
+    display: block;
+    cursor: pointer;
+}
+
+.card-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    background: radial-gradient(circle at 30% 30%, #4f46e5, #1e293b);
+    color: #e5e7eb;
+}
+
+.card-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #e5e7eb;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #9ca3af;
+}
+
+/*Buttons*/
+.card-button {
+    appearance: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0.55rem 1.2rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #f9fafb;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow:
+        0 10px 25px rgba(79, 70, 229, 0.45),
+        0 0 0 1px rgba(129, 140, 248, 0.35);
+    transition:
+        transform 0.13s ease-out,
+        box-shadow 0.13s ease-out,
+        filter 0.13s ease-out;
+}
+
+.card-button:hover,
+.card-button:focus-visible {
+    transform: translateY(-1px);
+    box-shadow:
+        0 14px 30px rgba(79, 70, 229, 0.55),
+        0 0 0 1px rgba(129, 140, 248, 0.4);
+    filter: brightness(1.05);
+}
+
+.card-button:active {
+    transform: translateY(1px);
+    box-shadow:
+        0 6px 16px rgba(79, 70, 229, 0.4),
+        0 0 0 1px rgba(129, 140, 248, 0.4);
+}
+
+/* Larger version of the button for the main "Classify" CTA */
+.primary-button {
+    padding: 0.75rem 2.5rem;
+    font-size: 1rem;
+}
+
+/*File input tricks*/
+.file-input {
+    display: none; /* clicking the label/card opens the chooser */
+}
+
+/*URL input styles */
+.card-input-row {
+    margin-top: 0.9rem;
+}
+
+.url-input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(148, 163, 184, 0.6);
+    background: rgba(15, 23, 42, 0.8);
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    outline: none;
+    transition:
+        border-color 0.15s ease-out,
+        box-shadow 0.15s ease-out,
+        background 0.15s ease-out;
+}
+
+.url-input::placeholder {
+    color: #6b7280;
+}
+
+.url-input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.5);
+    background: rgba(15, 23, 42, 0.95);
+}
+
+/*Form & main CTA */
+
+.classify-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.central-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+/* Utility to hide elements from JS */
+.hidden {
+    display: none !important;
+}
+
+/*Preview area (fake loading)*/
+
+.preview-area {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    min-height: 0;
+}
+
+.preview-container {
+    display: none;
+}
+
+.preview-container.preview-visible {
+    display: flex;
+    justify-content: center;
+}
+
+/* Smaller preview*/
+.preview-area .preview-image-wrapper {
+    position: relative;
+    width: 150px;
+    height: 220px;
+    border-radius: 1rem;
+    overflow: hidden;
+    background: radial-gradient(circle at top, #1f2937, #020617);
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(148, 163, 184, 0.4);
+    transform-origin: center;
+    animation: preview-pop 1.5s ease-out forwards;
+}
+
+.preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: saturate(1.05) contrast(1.05);
+}
+
+/* Overlay with loading spinner */
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(
+        circle at center,
+        rgba(15, 23, 42, 0.0) 40%,
+        rgba(15, 23, 42, 0.75) 100%
+    );
+    pointer-events: none;
+}
+
+.loading-spinner {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 3px solid rgba(148, 163, 184, 0.4);
+    border-top-color: #818cf8;
+    animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.85);
+}
+
+/*Results area*/
+
+.results-area {
+    margin-top: 1.25rem;
+}
+
+.results-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #e5e7eb;
+    text-align: center;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Each result card uses .card base style; we just tweak a bit */
+.result-card {
+    padding-top: 1.2rem;
+    padding-bottom: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* center horizontally */
+    justify-content: flex-start; /* content starts at top */
+}
+
+/* Big, centered "Top 1 / Top 2 / Top 3" */
+.result-card .result-rank {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #e5e7eb;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 0.7rem;
+}
+
+/* Centered, emphasized genre + probability */
+.result-card .result-label {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #c4b5fd;       /* soft lavender / purple highlight */
+    text-align: center;
+}
+
+/* Medal-style borders for result cards */
+
+/* Top 1: gold */
+.result-card--1 {
+    border-color: #facc15; 
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(250, 204, 21, 0.6);
+}
+
+.result-card--1:hover,
+.result-card--1:focus-within {
+    border-color: #fde047;
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(254, 240, 138, 0.8);
+}
+
+/* Top 2: silver */
+.result-card--2 {
+    border-color: #e5e7eb;
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(229, 231, 235, 0.6);
+}
+
+.result-card--2:hover,
+.result-card--2:focus-within {
+    border-color: #f9fafb;
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(249, 250, 251, 0.85);
+}
+
+/* Top 3: bronze */
+.result-card--3 {
+    border-color: #fb923c; 
+    box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.9),
+        0 0 0 1px rgba(251, 146, 60, 0.65);
+}
+
+.result-card--3:hover,
+.result-card--3:focus-within {
+    border-color: #fed7aa;
+    box-shadow:
+        0 22px 50px rgba(15, 23, 42, 0.95),
+        0 0 0 1px rgba(254, 215, 170, 0.85);
+}
+
+/* === Animations === */
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Image "pop" animation */
+@keyframes preview-pop {
+    0% {
+        transform: scale(0.85);
+        opacity: 0;
+    }
+    25% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(0.98);
+    }
+    75% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1.0);
+    }
+}
+
+/* === Responsive tweaks === */
+@media (max-width: 600px) {
+    .page {
+        padding: 1.8rem 1.2rem;
+    }
+
+    .title {
+        font-size: 1.6rem;
+    }
+
+    .card {
+        padding: 1.25rem 1.25rem 1rem;
+    }
+}
