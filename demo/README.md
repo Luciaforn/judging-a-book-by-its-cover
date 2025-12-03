@@ -17,5 +17,5 @@ pip install torch torchvision tornado pillow
 - Run demo.py
 - You should see this message: "Server running on http://localhost:8080"
 - In your browser you should see:
-- <img width="1915" height="973" alt="kafka" src="https://github.com/user-attachments/assets/70b6d75c-f08f-4ec5-bd2e-e3ba2708f90e" />
+  <img width="1915" height="973" alt="kafka" src="https://github.com/user-attachments/assets/70b6d75c-f08f-4ec5-bd2e-e3ba2708f90e" />
 - enjoy :)
