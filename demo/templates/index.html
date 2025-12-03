@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Cover Genre Classifier</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="page">
+        <header class="header">
+            <h1 class="title">Book Cover Genre Classifier</h1>
+            <p class="subtitle">
+    Choose <strong>one</strong> method below: upload a cover image from your device
+    or paste a cover image URL. 
+</p>
+
+        </header>
+
+        <main class="main">
+            <!-- Single form that contains both input cards and the central button.
+                 JS intercepts submit and calls /api/classify via fetch. -->
+            <form
+                id="classify-form"
+                class="classify-form"
+                action="/api/classify"
+                method="post"
+                enctype="multipart/form-data"
+            >
+                <div class="card-grid">
+
+                    <!-- Card 1: Upload a local image file -->
+                    <div class="card card--file">
+                        <label for="file-input" class="card-body card-clickable">
+                            <div class="card-icon" aria-hidden="true">📁</div>
+                            <h2 class="card-title">Upload a cover image</h2>
+                            <p class="card-text">
+                                Click this box to choose a file from your computer (JPG, PNG...).
+                            </p>
+                        </label>
+
+                        <!-- Hidden file input; clicking the card opens the file chooser -->
+                        <input
+                            id="file-input"
+                            class="file-input"
+                            type="file"
+                            name="file"
+                            accept="image/*"
+                        >
+                    </div>
+
+                    <!-- Card 2: Paste an image URL -->
+                    <div class="card card--url">
+                        <div class="card-body">
+                            <div class="card-icon" aria-hidden="true">🌐</div>
+                            <h2 class="card-title">Paste a cover URL</h2>
+                            <p class="card-text">
+                                Paste the direct URL of a book cover image (e.g. from Amazon or another site).
+                            </p>
+                            <div class="card-input-row">
+                                <input
+                                    type="url"
+                                    name="image_url"
+                                    class="url-input"
+                                    placeholder="https://example.com/my-book-cover.jpg"
+                                >
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Single central button -->
+                <div class="central-button-container">
+                    <button type="submit" class="card-button primary-button">
+                        Classify Image
+                    </button>
+                </div>
+
+                <!-- Preview + fake loading area (initially hidden) -->
+                <div class="preview-area">
+                    <div class="preview-container" id="preview-container">
+                        <div class="preview-image-wrapper">
+                            <img id="preview-img" class="preview-image" alt="Cover preview">
+                            <div class="loading-overlay hidden" id="loading-overlay">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results area: 3 cards -->
+                <div class="results-area hidden" id="results-area">
+                    <h2 class="results-title">Predicted genres</h2>
+                    <div class="results-grid">
+
+                        <!-- Top 1 card -->
+                        <div class="card result-card result-card--1">
+                            <div class="result-rank">Top 1</div>
+                            <div class="result-label" id="result-top1-label">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Top 2 card -->
+                        <div class="card result-card result-card--2">
+                            <div class="result-rank">Top 2</div>
+                            <div class="result-label" id="result-top2-label">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Top 3 card -->
+                        <div class="card result-card result-card--3">
+                            <div class="result-rank">Top 3</div>
+                            <div class="result-label" id="result-top3-label">
+                                <!-- Filled by JS -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </form>
+        </main>
+    </div>
+
+    <!-- JS: handles preview, fake loading animation and calling /api/classify -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
