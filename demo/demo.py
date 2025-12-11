@@ -11,15 +11,48 @@ from torchvision import models, transforms
 from PIL import Image
 
 
-#CONFIG & MODEL LOADING
+#configuration and model loading
 
-# Path to the trained model (.pth) saved from Colab
+# Path to the trained model (.pth)
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "resnet50_bookcovers.pth")
 
-# Normalization used for ImageNet (same as during training)
+# Normalization used for ImageNet 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
+#classes list needed if the .pth doesn't already contain it
+CLASSES = [
+            "Arts & Photography",
+            "Biographies & Memoirs",
+            "Business & Money",
+            "Calendars",
+            "Children's Books",
+            "Christian Books & Bibles",
+            "Comics & Graphic Novels",
+            "Computers & Technology",
+            "Cookbooks, Food & Wine",
+            "Crafts, Hobbies & Home",
+            "Engineering & Transportation",
+            "Health, Fitness & Dieting",
+            "History",
+            "Humor & Entertainment",
+            "Law",
+            "Literature & Fiction",
+            "Medical Books",
+            "Mystery, Thriller & Suspense",
+            "Parenting & Relationships",
+            "Politics & Social Sciences",
+            "Reference",
+            "Religion & Spirituality",
+            "Romance",
+            "Science & Math",
+            "Science Fiction & Fantasy",
+            "Self-Help",
+            "Sports & Outdoors",
+            "Teen & Young Adult",
+            "Test Preparation",
+            "Travel",
+        ]
 # Preprocessing pipeline for inference (resize -> tensor -> normalize)
 preprocess = transforms.Compose(
     [
@@ -38,8 +71,9 @@ print("Using device:", device)
 
 def build_model(num_classes: int) -> nn.Module:
     """
-    Recreate the architecture used in training:
-    ResNet-50 (pretrained) + custom classifier head 2048 -> 512 -> num_classes.
+    Creates a ResNet-50 model pre-trained on ImageNet and replaces
+    the final fully-connected layer so that it outputs `num_classes`
+    genre logits.
     """
     model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 
@@ -53,33 +87,50 @@ def build_model(num_classes: int) -> nn.Module:
     return model
 
 
-def load_checkpoint(model_path: str, device: torch.device):
+def load_checkpoint(model_path: str, device: torch.device, classes:list[str]):
     """
-    Load the .pth checkpoint and return:
-      - model (in eval mode, moved to `device`)
+    Loads the .pth checkpoint and returns:
+      - model
       - classes (list of class names, index -> name)
       - class_to_idx (dict: name -> index)
+
+    Supports two formats:
+      1) checkpoint dict with keys, contains the weights and "classes" and "class_to_idx
+      2) simple state_dict containing only weights, in this case, we recreate 'classes' and 'class_to_idx' locally.
     """
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Checkpoint file not found: {model_path}")
 
     checkpoint = torch.load(model_path, map_location=device)
 
-    classes = checkpoint["classes"]
-    class_to_idx = checkpoint["class_to_idx"]
-    num_classes = len(classes)
+    #Case 1 checkpoint containing classes and class_to_idx
+    if isinstance(checkpoint, dict) and "classes" in checkpoint and "model_state_dict" in checkpoint:
+        classes = checkpoint["classes"]
+        class_to_idx = checkpoint["class_to_idx"]
+        num_classes = len(classes)
 
-    model = build_model(num_classes)
-    model.load_state_dict(checkpoint["model_state_dict"])
+        model = build_model(num_classes)
+        model.load_state_dict(checkpoint["model_state_dict"])
+
+    # Case 2 base checkpoint with wegiths, classes and class_to_idx must be created
+    else:
+        #class list and its order, this order matches the sorted class list used during training.
+        class_to_idx = {name: i for i, name in enumerate(classes)}
+        num_classes = len(classes)
+
+        model = build_model(num_classes)
+        model.load_state_dict(checkpoint)
+
     model.to(device)
     model.eval()
 
     return model, classes, class_to_idx
 
 
-# Load the model ONCE at server startup
+
+# The model is loaded once at the server startup
 print(f"Loading model from: {MODEL_PATH}")
-MODEL, CLASSES, CLASS_TO_IDX = load_checkpoint(MODEL_PATH, device)
+MODEL, CLASSES, CLASS_TO_IDX = load_checkpoint(MODEL_PATH, device,CLASSES)
 print("Model loaded. Ready for inference.")
 
 
@@ -93,10 +144,10 @@ def predict_pil_image(img: Image.Image, topk: int = 3):
     ]
     """
     img_t = preprocess(img)
-    input_batch = img_t.unsqueeze(0).to(device)  # shape: [1, 3, 224, 224]
+    input_batch = img_t.unsqueeze(0).to(device) 
 
     with torch.no_grad():
-        outputs = MODEL(input_batch)  # [1, num_classes]
+        outputs = MODEL(input_batch)  
         probs = torch.softmax(outputs, dim=1)
         top_probs, top_idxs = probs.topk(topk, dim=1)
 
@@ -115,11 +166,11 @@ def predict_pil_image(img: Image.Image, topk: int = 3):
     return predictions
 
 
-#TORNADO HANDLERS
+#Tornado Handlers
 
 
 class MainHandler(tornado.web.RequestHandler):
-    """Serve the main page (HTML + JS)."""
+    """Serves the main page """
 
     def get(self):
         self.render("index.html")
@@ -130,7 +181,7 @@ class ApiClassifyHandler(tornado.web.RequestHandler):
     JSON API endpoint used by the front-end.
 
     Accepts either:
-      - multipart/form-data with field "file" (uploaded image), or
+      - multipart/form-data with field "file" (uploaded image)
       - form field "image_url" (URL to an image).
 
     Returns:
@@ -142,7 +193,7 @@ class ApiClassifyHandler(tornado.web.RequestHandler):
         files = self.request.files.get("file")
         img = None
 
-        # Case 1: image URL
+        # Case 1 image URL
         if image_url:
             try:
                 with urllib.request.urlopen(image_url) as response:
@@ -153,7 +204,7 @@ class ApiClassifyHandler(tornado.web.RequestHandler):
                 self.write({"error": "Could not download image from the given URL."})
                 return
 
-        # Case 2: uploaded file
+        # Case 2 uploaded file
         elif files:
             try:
                 body = files[0]["body"]
@@ -174,7 +225,7 @@ class ApiClassifyHandler(tornado.web.RequestHandler):
         self.write({"predictions": predictions})
 
 
-# APP SETUP
+# App setup
 
 
 def make_app():
