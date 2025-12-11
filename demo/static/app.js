@@ -32,6 +32,10 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    /**
+ * Show the preview container, run a short "fake loading" animation,
+ * then call `onComplete()` (which actually sends the request to /api/classify).
+ */
     function showPreviewAndAnimate(startRequestCallback) {
         // Hide main button
         if (mainButton) {
@@ -59,6 +63,10 @@ document.addEventListener("DOMContentLoaded", function () {
         setTimeout(startRequestCallback, 200);
     }
 
+    /**
+ * Update the three result cards (Top1 / Top2 / Top3)
+ * based on the predictions returned by the backend.
+ */
    function updateResults(predictions) {
     // Order: predictions[0] = Top 1, [1] = Top 2, [2] = Top 3
     const labels = [top1Label, top2Label, top3Label];
@@ -69,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (!labelElem || !pred) continue;
 
         const pct = (pred.prob * 100).toFixed(2);
-        // Only show "Genre (xx.xx%)", no "Top X:" prefix
+        
         labelElem.textContent = `${pred.class_name} (${pct}%)`;
     }
 
@@ -80,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     form.addEventListener("submit", function (event) {
-        // We handle everything via JS
+        
         event.preventDefault();
 
         if (isSubmitting) {
@@ -132,7 +140,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         };
 
-        // PRIORITY: if URL is present, ignore file and use URL
+        //if URL is present, ignore file and use URL
         if (url) {
             if (fileInput) {
                 fileInput.value = "";
@@ -144,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Otherwise, use the file (we know file is truthy here)
+        // Otherwise use the file 
         if (file) {
             if (urlInput) {
                 urlInput.value = "";
