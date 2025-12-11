@@ -1,4 +1,4 @@
-/* Global reset-ish*/
+
 *,
 *::before,
 *::after {
@@ -167,7 +167,7 @@ html, body {
 
 /*File input tricks*/
 .file-input {
-    display: none; /* clicking the label/card opens the chooser */
+    display: none; /* clicking the label or card opens the chooser */
 }
 
 /*URL input styles */
@@ -304,17 +304,17 @@ html, body {
     gap: 1.5rem;
 }
 
-/* Each result card uses .card base style; we just tweak a bit */
+/* Each result card uses .card base style */
 .result-card {
     padding-top: 1.2rem;
     padding-bottom: 1.2rem;
     display: flex;
     flex-direction: column;
-    align-items: center;       /* center horizontally */
-    justify-content: flex-start; /* content starts at top */
+    align-items: center;       
+    justify-content: flex-start; 
 }
 
-/* Big, centered "Top 1 / Top 2 / Top 3" */
+/* Big and centered Top 1 / Top 2 / Top 3 */
 .result-card .result-rank {
     font-size: 1.3rem;
     font-weight: 700;
@@ -326,17 +326,16 @@ html, body {
     margin-bottom: 0.7rem;
 }
 
-/* Centered, emphasized genre + probability */
 .result-card .result-label {
     font-size: 1.05rem;
     font-weight: 700;
-    color: #c4b5fd;       /* soft lavender / purple highlight */
+    color: #c4b5fd;       
     text-align: center;
 }
 
 /* Medal-style borders for result cards */
 
-/* Top 1: gold */
+/* Top 1 gold */
 .result-card--1 {
     border-color: #facc15; 
     box-shadow:
@@ -352,7 +351,7 @@ html, body {
         0 0 0 1px rgba(254, 240, 138, 0.8);
 }
 
-/* Top 2: silver */
+/* Top 2 silver */
 .result-card--2 {
     border-color: #e5e7eb;
     box-shadow:
@@ -368,7 +367,7 @@ html, body {
         0 0 0 1px rgba(249, 250, 251, 0.85);
 }
 
-/* Top 3: bronze */
+/* Top 3 bronze */
 .result-card--3 {
     border-color: #fb923c; 
     box-shadow:
@@ -384,7 +383,7 @@ html, body {
         0 0 0 1px rgba(254, 215, 170, 0.85);
 }
 
-/* === Animations === */
+/*Animations*/
 
 @keyframes spin {
     to {
@@ -413,7 +412,7 @@ html, body {
     }
 }
 
-/* === Responsive tweaks === */
+/*esponsive tweaks*/
 @media (max-width: 600px) {
     .page {
         padding: 1.8rem 1.2rem;
