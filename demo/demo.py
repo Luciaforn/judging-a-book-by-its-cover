@@ -233,7 +233,7 @@ def make_app():
     settings = {
         "template_path": os.path.join(base_dir, "templates"),
         "static_path": os.path.join(base_dir, "static"),
-        "debug": True,
+        "debug": False,
     }
     return tornado.web.Application(
         [
