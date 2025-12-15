@@ -94,13 +94,13 @@ class BookModelVisualizer:
 
             # Evaluation logic
             if top1_idx == label_idx:
-                status = "TOP-1 ✅"
+                status = "TOP-1"
                 status_color = "green"
             elif int(label_idx) in preds:
-                status = "TOP-3 ⚠️"
+                status = "TOP-3"
                 status_color = "orange"
             else:
-                status = "FAIL ❌"
+                status = "FAIL"
                 status_color = "red"
 
             title = f"True: {true_label_name}\nPred: {top1_name}\n{status}"
@@ -111,7 +111,7 @@ class BookModelVisualizer:
             for j in range(3):
                 cls_name = self.class_names[int(preds[j])]
                 prob_val = probs_np[j] * 100
-                marker = "👈" if int(preds[j]) == int(label_idx) else ""
+                marker = "-" if int(preds[j]) == int(label_idx) else ""
                 info_text += f"{j+1}. {cls_name}: {prob_val:.1f}% {marker}\n"
 
             ax.text(
@@ -167,13 +167,13 @@ class BookModelVisualizer:
             status = "Pred only"
             status_color = "black"
         elif top1_idx == true_label_idx:
-            status = "TOP-1 ✅"
+            status = "TOP-1 "
             status_color = "green"
         elif int(true_label_idx) in preds:
-            status = "TOP-3 ⚠️"
+            status = "TOP-3 "
             status_color = "orange"
         else:
-            status = "FAIL ❌"
+            status = "FAIL "
             status_color = "red"
 
         title = f"True: {true_name}\nPred: {top1_name}\n{status}"
@@ -186,7 +186,7 @@ class BookModelVisualizer:
             prob_val = probs_np[j] * 100
             marker = ""
             if true_label_idx is not None and int(preds[j]) == int(true_label_idx):
-                marker = "👈"
+                marker = "-"
             info_text += f"{j+1}. {cls_name}: {prob_val:.1f}% {marker}\n"
 
         plt.gcf().text(
@@ -406,14 +406,14 @@ class BookModelVisualizer:
                 filename = str(row["Filename"])
                 img_path = os.path.join(dataset.root_dir, filename)
             except Exception as e:
-                print(f"⚠️ Unable to get path for idx={idx}: {e}")
+                print(f" Unable to get path for idx={idx}: {e}")
                 continue
 
             # Load original image
             try:
                 orig_img = Image.open(img_path).convert("RGB")
             except Exception as e:
-                print(f"⚠️ Unable to open {img_path}: {e}")
+                print(f" Unable to open {img_path}: {e}")
                 continue
 
             # Apply the same transform pipeline (ToTensor + Normalize, etc.)
@@ -458,7 +458,7 @@ class BookModelVisualizer:
         y_true = []
         y_pred = []
 
-        print("📊 Calcolo delle predizioni per la Matrice di Confusione...")
+        print(" Calcolo delle predizioni per la Matrice di Confusione...")
         with torch.no_grad():
             for inputs, labels in dataloader:
                 inputs = inputs.to(self.device)
@@ -513,7 +513,7 @@ class BookModelVisualizer:
         val_loss = history.get('val_loss', [])
 
         if not train_loss or not val_loss:
-            print("⚠️ history does not contain 'train_loss' and/or 'val_loss'. Nothing to plot.")
+            print(" history does not contain 'train_loss' and/or 'val_loss'. Nothing to plot.")
             return
 
         epochs = range(1, len(train_loss) + 1)
