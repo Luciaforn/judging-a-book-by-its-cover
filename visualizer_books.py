@@ -204,75 +204,102 @@ class BookModelVisualizer:
     #  Grad-CAM: generate heatmap for a single image
     # ------------------------------------------------------------------
     def generate_gradcam(self, input_tensor, target_class=None, target_layer_name="layer4"):
-        """
-        Computes Grad-CAM for a single image (C,H,W) already normalized (ImageNet).
+    """
+    Compute Grad-CAM for a single image (C,H,W) already normalized (ImageNet).
 
-        Args:
-            input_tensor: image tensor (C,H,W) normalized.
-            target_class: index of the target class; if None uses the predicted class.
-            target_layer_name: name of the convolutional layer to compute Grad-CAM on
-                               (for ResNet50 typically 'layer4').
+    Args:
+        input_tensor: image tensor (C,H,W), normalized.
+        target_class: target class index; if None, use predicted class.
+        target_layer_name: conv layer name where Grad-CAM is computed
+                           (for ResNet50 typically 'layer4').
 
-        Returns:
-            cam: 2D numpy array in [0,1] with shape [H, W]
-            target_class: integer index of the target class used for the backward.
-        """
-        self.model.eval()
+    Returns:
+        cam: 2D numpy array [H, W] in [0,1]
+        target_class: int, class index actually used for backward.
+    """
+    self.model.eval()
 
-        # [1, C, H, W]
-        input_tensor = input_tensor.unsqueeze(0).to(self.device)
+    # [1, C, H, W]
+    input_tensor = input_tensor.unsqueeze(0).to(self.device)
 
-        activations = {}
-        gradients = {}
+    activations = {}
+    gradients = {}
 
-        def fwd_hook(module, inp, out):
-            activations["value"] = out.detach()
+    def fwd_hook(module, inp, out):
+        activations["value"] = out.detach()
 
-        def bwd_hook(module, grad_input, grad_output):
-            gradients["value"] = grad_output[0].detach()
+    def bwd_hook(module, grad_input, grad_output):
+        # grad_output is a tuple; we want grad wrt the output feature maps
+        gradients["value"] = grad_output[0].detach()
 
-        target_layer = dict(self.model.named_modules())[target_layer_name]
-        handle_fwd = target_layer.register_forward_hook(fwd_hook)
+    # 1) Find the target layer
+    modules_dict = dict(self.model.named_modules())
+    if target_layer_name not in modules_dict:
+        raise KeyError(
+            f"Grad-CAM error: layer '{target_layer_name}' not found in model. "
+            f"Available keys include e.g. {list(modules_dict.keys())[:10]}"
+        )
+    target_layer = modules_dict[target_layer_name]
 
-        if hasattr(target_layer, "register_full_backward_hook"):
-            handle_bwd = target_layer.register_full_backward_hook(bwd_hook)
-        else:
-            handle_bwd = target_layer.register_backward_hook(bwd_hook)
+    # 2) Register hooks
+    handle_fwd = target_layer.register_forward_hook(fwd_hook)
+    # 🔧 Use legacy backward hook for better compatibility (PyTorch 2.x)
+    handle_bwd = target_layer.register_backward_hook(bwd_hook)
 
-        output = self.model(input_tensor)  # [1, num_classes]
+    # 3) Forward pass
+    output = self.model(input_tensor)  # [1, num_classes]
 
-        if target_class is None:
-            target_class = int(output.argmax(dim=1).item())
+    # 4) Choose target class
+    if target_class is None:
+        target_class = int(output.argmax(dim=1).item())
 
-        self.model.zero_grad()
-        score = output[0, target_class]
+    # 5) Backward pass
+    self.model.zero_grad()
+    score = output[0, target_class]
+
+    # Make sure gradients are enabled
+    with torch.enable_grad():
         score.backward()
 
-        handle_fwd.remove()
-        handle_bwd.remove()
+    # Remove hooks
+    handle_fwd.remove()
+    handle_bwd.remove()
 
-        acts = activations["value"]   # [1, C, H', W']
-        grads = gradients["value"]    # [1, C, H', W']
-
-        weights = grads.mean(dim=(2, 3), keepdim=True)  # [1, C, 1, 1]
-
-        cam = (weights * acts).sum(dim=1, keepdim=True)  # [1, 1, H', W']
-        cam = F.relu(cam)
-
-        cam = F.interpolate(
-            cam,
-            size=(input_tensor.size(2), input_tensor.size(3)),
-            mode="bilinear",
-            align_corners=False,
+    # 6) Safety check: did hooks actually fire?
+    if "value" not in activations or "value" not in gradients:
+        raise RuntimeError(
+            f"Grad-CAM hooks did not capture activations/gradients for layer "
+            f"'{target_layer_name}'. This can happen if the layer is not used "
+            f"in the forward pass or due to a PyTorch hook quirk."
         )
 
-        cam = cam.squeeze().cpu().numpy()  # [H, W]
+    acts = activations["value"]   # [1, C, H', W']
+    grads = gradients["value"]    # [1, C, H', W']
 
-        cam -= cam.min()
-        if cam.max() > 0:
-            cam /= cam.max()
+    # 7) Global average pool over gradients -> channel-wise weights
+    weights = grads.mean(dim=(2, 3), keepdim=True)  # [1, C, 1, 1]
 
-        return cam, target_class
+    # 8) Weighted combination
+    cam = (weights * acts).sum(dim=1, keepdim=True)  # [1, 1, H', W']
+    cam = F.relu(cam)
+
+    # 9) Resize CAM to input resolution
+    cam = F.interpolate(
+        cam,
+        size=(input_tensor.size(2), input_tensor.size(3)),
+        mode="bilinear",
+        align_corners=False,
+    )
+
+    cam = cam.squeeze().cpu().numpy()  # [H, W]
+
+    # 10) Normalize to [0, 1]
+    cam -= cam.min()
+    if cam.max() > 0:
+        cam /= cam.max()
+
+    return cam, target_class
+
 
     # ------------------------------------------------------------------
     #  Grad-CAM: visualization of image + heatmap
