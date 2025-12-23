@@ -10,7 +10,7 @@ This is a small Tornado web app that uses a trained ResNet-50 model to classify 
 ```bash
 pip install torch torchvision tornado pillow
 ```
-- Get the resnet50_bookcovers.pth
+- Get the resnet50_bookcovers.pth from <a href="https://drive.google.com/file/d/1ZASzx2gFpqq0Q7reXYnw3yb2NkjNQ6Ny/view?usp=sharing">here</a> 
 
 ## Installation
 - Put resnet50_bookcovers.pth in the project directory
